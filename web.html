@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Web Utama</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f3f4f6; margin:0; padding:20px; }
+    .header { background:#2563eb; color:#fff; padding:20px; border-radius:12px; text-align:center; margin-bottom:20px; }
+    .card { background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.1); margin-bottom:20px; }
+    button { padding:10px 16px; border:none; border-radius:8px; cursor:pointer; margin-right:8px; font-weight:600; }
+    .logout { background:#dc2626; color:#fff; }
+    .logout:hover { background:#b91c1c; }
+    .reset { background:#6b7280; color:#fff; }
+    .reset:hover { background:#4b5563; }
+    /* Tambahan: gaya tombol Google (warna resmi Google) */
+    .google { background:#4285F4; color:#fff; }
+    .google:hover { background:#357ae8; }
+    ul { padding-left:20px; margin-top:10px; }
+    li { margin-bottom:6px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Halaman Utama 🚀</h1>
+  </div>
+
+  <div class="card">
+    <p>Kamu masuk sebagai: <strong id="currentUser"></strong></p>
+
+    <h3>Daftar Pengunjung</h3>
+    <ul id="visitorList"></ul>
+
+    <!-- tombol: Logout, Reset, dan tambahan Login dengan Google (dummy redirect) -->
+    <button class="logout" onclick="logout()">Logout</button>
+    <button class="reset" onclick="resetVisitors()">Reset Pengunjung</button>
+    <button class="google" onclick="loginGoogle()">Login dengan Google</button>
+  </div>
+
+  <script>
+    const isGuest = localStorage.getItem("isGuest") === "true";
+    let userName;
+
+    if (isGuest) {
+      userName = localStorage.getItem("guestName") || "Tamu";
+    } else {
+      userName = localStorage.getItem("userEmailLoggedIn") || "Pengguna";
+    }
+
+    const now = new Date();
+    const waktu = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}, ${now.getHours()}.${now.getMinutes()}.${now.getSeconds()}`;
+
+    let visitors = JSON.parse(localStorage.getItem("visitors") || "[]");
+
+    // ✅ Cek: jika user sudah ada, update waktunya; jika belum, tambahkan.
+    const existing = visitors.find(v => v.name === userName);
+    if (existing) {
+      existing.time = waktu; // update waktu terakhir login
+    } else {
+      visitors.push({ name: userName, time: waktu }); // tambah baru kalau belum ada
+    }
+
+    localStorage.setItem("visitors", JSON.stringify(visitors));
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("currentUser").textContent = userName;
+
+      const list = document.getElementById("visitorList");
+      list.innerHTML = "";
+      visitors.forEach(v => {
+        const li = document.createElement("li");
+        li.textContent = `${v.name} masuk pada ${v.time}`;
+        list.appendChild(li);
+      });
+    });
+
+    function logout() {
+      localStorage.removeItem("isGuest");
+      localStorage.removeItem("guestName");
+      localStorage.removeItem("userEmailLoggedIn");
+      window.location.href = "login.html";
+    }
+
+    function resetVisitors() {
+      localStorage.removeItem("visitors");
+      location.reload();
+    }
+
+    // *** Tombol Google (DUMMY) ***
+    // Ini hanya redirect ke halaman login Google. Untuk autentikasi nyata:
+    // daftar OAuth Client ID di Google Cloud dan gunakan Google Identity Services.
+    function loginGoogle() {
+      // buka halaman login Google (dummy). Ganti dengan flow GSI untuk autentikasi nyata.
+      window.location.href = "https://accounts.google.com/signin/v2/identifier";
+    }
+  </script>
+</body>
+</html>
